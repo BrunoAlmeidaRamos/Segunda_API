@@ -3,9 +3,9 @@ using Segunda_API.Models;
 
 namespace Segunda_API.Context;
 
-public class AddDbContext
+public class AppDbContext: DbContext
 {
-    public AddDbContext(DbContextOptions<AppContext> options) : base(options)
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {
     }
 

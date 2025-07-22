@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace Segunda_API.Models;
 
@@ -27,6 +28,8 @@ public class Produto
     public float Estoque {set; get;}
     public DateTime DataCadastro {set; get;}
     public int CategoriaId {set; get;}
+
+    [JsonIgnore]
     public Categoria? Categoria {set; get; }
 
 }

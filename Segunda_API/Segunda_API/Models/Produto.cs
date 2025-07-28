@@ -10,7 +10,7 @@ public class Produto
     [Key]
     public int ProdutoId {set; get;}
 
-    [Required]
+    [Required(ErrorMessage = "O Nome é obrigatório...")]
     [StringLength(100)]
     public string? Nome {set; get;}
 

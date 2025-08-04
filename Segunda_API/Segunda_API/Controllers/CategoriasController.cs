@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Segunda_API.Context;
 using Segunda_API.Models;
+using Microsoft.Extensions.Logging;
 
 namespace Segunda_API.Controllers;
 
@@ -11,10 +12,12 @@ namespace Segunda_API.Controllers;
 public class CategoriasController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly ILogger _logger;
 
-    public CategoriasController(AppDbContext context)
+    public CategoriasController(AppDbContext context, ILogger<CategoriasController> logger)
     {
         _context = context;
+        _logger = logger;
     }
 
     [HttpGet("Produtos")]

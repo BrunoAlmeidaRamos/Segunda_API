@@ -4,7 +4,7 @@ namespace Segunda_API.Repositories;
 
 public interface ICategoriaRepository
 {
-    IEnumerable<Categoria> GeCategorias();
+    IEnumerable<Categoria> GetCategorias();
     Categoria GetCategoria(int id);
     Categoria Create (Categoria categoria);
     Categoria Update(Categoria categoria);

@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Segunda_API.Context;
 using Segunda_API.Models;
 using Microsoft.Extensions.Logging;
+using Segunda_API.Repositories;
 
 namespace Segunda_API.Controllers;
 
@@ -11,43 +12,33 @@ namespace Segunda_API.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly ILogger _logger;
+    private readonly ICategoriaRepository _repository;
+    private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(AppDbContext context, ILogger<CategoriasController> logger)
+    public CategoriasController(ICategoriaRepository repository, ILogger<CategoriasController> logger)
     {
-        _context = context;
+        _repository = repository;
         _logger = logger;
     }
 
-    [HttpGet("Produtos")]
+    /*ttpGet("Produtos")]
     public ActionResult<IEnumerable<Categoria>> GetCategoriasProdutos()
     {
-        return _context.Categorias.Include(p=> p.Produtos).AsNoTracking().ToList();
-    }
+        return _repository.Categorias.Include(p=> p.Produtos).AsNoTracking().ToList();
+    }*/ 
 
     [HttpGet]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categorias = _context.Categorias?.AsNoTracking().ToList();
-
-        if (categorias is null)
-        {
-            return NotFound("Categoria não encontrados.");
-        }
-
-        return categorias;
+        var categorias = _repository.GetCategorias();
+        return Ok(categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> Get(int id)
     {
-        var categoria = _context.Categorias?.FirstOrDefault(p => p.CategoriaId == id);
-        if (categoria is null)
-        {
-            return NotFound($"Esse ID {id} Não existe");
-        }
-        return categoria;
+        var categoria = _repository.GetCategoria(id);
+        return Ok(categoria);
     }
 
     [HttpPost]
@@ -57,9 +48,9 @@ public class CategoriasController : ControllerBase
         {
             return BadRequest("Categoria não pode ser nulo.");
         }
-        _context.Categorias?.Add(categoria);
-        _context.SaveChanges();
-        return new CreatedAtRouteResult("ObterCategoria", new { id = categoria.CategoriaId }, categoria);
+       var CategoriaCriada = _repository.Create(categoria);
+
+        return new CreatedAtRouteResult("ObterCategoria", new { id = CategoriaCriada.CategoriaId }, CategoriaCriada);
     }
 
     [HttpPut("{id:int}")]
@@ -70,22 +61,20 @@ public class CategoriasController : ControllerBase
             return BadRequest("ID do Categoria não corresponde ao ID da URL.");
         }
 
-        _context.Entry(categoria).State = EntityState.Modified;
-        _context.SaveChanges();
-
+        _repository.Update(categoria);
         return Ok(categoria);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var categoria = _context.Categorias?.FirstOrDefault(p => p.CategoriaId == id);
+        var categoria = _repository.GetCategoria(id);
         if (categoria is null)
         {
             return NotFound($"Categoria com ID {id} não encontrado.");
         }
-        _context.Categorias?.Remove(categoria);
-        _context.SaveChanges();
+        
+        var categoriaRemovida = _repository.Delete(id);
         return Ok($"Categoria com ID {id} foi removido com sucesso.");
     }
 }

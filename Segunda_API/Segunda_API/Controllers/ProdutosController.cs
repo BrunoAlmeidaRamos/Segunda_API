@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Segunda_API.Context;
 using Segunda_API.Models;
+using Segunda_API.Repositories;
 
 namespace Segunda_API.Controllers;
 
@@ -10,35 +11,35 @@ namespace Segunda_API.Controllers;
 [ApiController]
 public class ProdutosController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IProdutoRepository _repository;
 
-    public ProdutosController(AppDbContext context)
+    public ProdutosController(IProdutoRepository repository)
     {
-        _context = context;
+        _repository = repository;
     }
 
     [HttpGet]
     public ActionResult<IEnumerable<Produto>> Get()
     {
-        var produtos = _context.Produtos?.AsNoTracking().ToList();
+        var produtos = _repository.GetProdutos().ToList();
 
         if (produtos is null)
         {
             return NotFound("Produtos não encontrados.");
         }
 
-        return produtos;
+        return Ok(produtos);
     }
 
     [HttpGet("{id:int:min(1)}", Name = "ObterProduto")]
     public ActionResult<Produto> Get(int id)
     {
-        var produto = _context.Produtos?.FirstOrDefault(p => p.ProdutoId == id);
+        var produto = _repository.GetProduto(id);
         if (produto is null)
         {
             return NotFound($"Esse ID {id} Não existe");
         }
-        return produto;
+        return Ok(produto);
     }
 
     [HttpPost]
@@ -48,9 +49,10 @@ public class ProdutosController : ControllerBase
         {
             return BadRequest("Produto não pode ser nulo.");
         }
-        _context.Produtos?.Add(produto);
-        _context.SaveChanges();
-        return new CreatedAtRouteResult("ObterProduto", new { id = produto.ProdutoId }, produto);
+        
+        var NovoProduto = _repository.Create(produto);
+
+        return new CreatedAtRouteResult("ObterProduto", new { id = NovoProduto.ProdutoId }, NovoProduto);
     }
 
     [HttpPut("{id:int}")]
@@ -61,22 +63,28 @@ public class ProdutosController : ControllerBase
             return BadRequest("ID do produto não corresponde ao ID da URL.");
         }
 
-        _context.Entry(produto).State = EntityState.Modified;
-        _context.SaveChanges();
-
-        return Ok(produto);
+        bool atualizado = _repository.Update(produto);
+        if (atualizado)
+        {
+            return Ok(produto);
+        }
+        else
+        {
+            return StatusCode(500, $"Produto com ID {id} não encontrado ou não pôde ser atualizado.");
+        }
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var produto = _context.Produtos?.FirstOrDefault(p => p.ProdutoId == id);
-        if (produto is null)
+       bool deletado = _repository.Delete(id);
+        if (deletado)
         {
-            return NotFound($"Produto com ID {id} não encontrado.");
+            return Ok($"Produto com ID {id} foi deletado.");
         }
-        _context.Produtos?.Remove(produto);
-        _context.SaveChanges();
-        return Ok($"Produto com ID {id} foi removido com sucesso.");
+        else
+        {
+            return StatusCode(500, $"Produto com ID {id} não encontrado ou não pôde ser exluido.");
+        }
     }
 }

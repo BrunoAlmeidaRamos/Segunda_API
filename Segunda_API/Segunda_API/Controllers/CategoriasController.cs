@@ -12,10 +12,10 @@ namespace Segunda_API.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly ICategoriaRepository _repository;
+    private readonly IRepository<Categoria> _repository;
     private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(ICategoriaRepository repository, ILogger<CategoriasController> logger)
+    public CategoriasController(IRepository<Categoria> repository, ILogger<CategoriasController> logger)
     {
         _repository = repository;
         _logger = logger;
@@ -30,14 +30,14 @@ public class CategoriasController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categorias = _repository.GetCategorias();
+        var categorias = _repository.GetAll();
         return Ok(categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> Get(int id)
     {
-        var categoria = _repository.GetCategoria(id);
+        var categoria = _repository.GetById(c=> c.CategoriaId == id);
         return Ok(categoria);
     }
 
@@ -68,13 +68,13 @@ public class CategoriasController : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var categoria = _repository.GetCategoria(id);
+        var categoria = _repository.GetById(c => c.CategoriaId == id);
         if (categoria is null)
         {
             return NotFound($"Categoria com ID {id} não encontrado.");
         }
         
-        var categoriaRemovida = _repository.Delete(id);
+        var categoriaRemovida = _repository.Delete(categoria);
         return Ok($"Categoria com ID {id} foi removido com sucesso.");
     }
 }

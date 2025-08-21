@@ -12,12 +12,12 @@ namespace Segunda_API.Controllers;
 [ApiController]
 public class CategoriasController : ControllerBase
 {
-    private readonly IRepository<Categoria> _repository;
+    private readonly IUnitOfWork _uof;
     private readonly ILogger<CategoriasController> _logger;
 
-    public CategoriasController(IRepository<Categoria> repository, ILogger<CategoriasController> logger)
+    public CategoriasController(IUnitOfWork uof, ILogger<CategoriasController> logger)
     {
-        _repository = repository;
+        _uof = uof;
         _logger = logger;
     }
 
@@ -30,14 +30,14 @@ public class CategoriasController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<Categoria>> Get()
     {
-        var categorias = _repository.GetAll();
+        var categorias = _uof.CategoriaRepository.GetAll();
         return Ok(categorias);
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
     public ActionResult<Categoria> Get(int id)
     {
-        var categoria = _repository.GetById(c=> c.CategoriaId == id);
+        var categoria = _uof.CategoriaRepository.GetById(c=> c.CategoriaId == id);
         return Ok(categoria);
     }
 
@@ -48,7 +48,8 @@ public class CategoriasController : ControllerBase
         {
             return BadRequest("Categoria não pode ser nulo.");
         }
-       var CategoriaCriada = _repository.Create(categoria);
+       var CategoriaCriada = _uof.CategoriaRepository.Create(categoria);
+        _uof.commit();
 
         return new CreatedAtRouteResult("ObterCategoria", new { id = CategoriaCriada.CategoriaId }, CategoriaCriada);
     }
@@ -61,20 +62,24 @@ public class CategoriasController : ControllerBase
             return BadRequest("ID do Categoria não corresponde ao ID da URL.");
         }
 
-        _repository.Update(categoria);
+        _uof.CategoriaRepository.Update(categoria);
+        _uof.commit();
+
         return Ok(categoria);
     }
 
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-        var categoria = _repository.GetById(c => c.CategoriaId == id);
+        var categoria = _uof.CategoriaRepository.GetById(c => c.CategoriaId == id);
         if (categoria is null)
         {
             return NotFound($"Categoria com ID {id} não encontrado.");
         }
         
-        var categoriaRemovida = _repository.Delete(categoria);
+        var categoriaRemovida = _uof.CategoriaRepository.Delete(categoria);
+        _uof.commit();
+
         return Ok($"Categoria com ID {id} foi removido com sucesso.");
     }
 }

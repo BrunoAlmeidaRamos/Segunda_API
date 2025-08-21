@@ -11,19 +11,17 @@ namespace Segunda_API.Controllers;
 [ApiController]
 public class ProdutosController : ControllerBase
 {
-    private readonly IProdutoRepository _produtoRepository;
-    private readonly IRepository<Produto> _repository;
+    private readonly IUnitOfWork _uof;
 
-    public ProdutosController(IRepository<Produto> repository, IProdutoRepository produtoRepository)
+    public ProdutosController(IUnitOfWork uof)
     {
-        _produtoRepository = produtoRepository;
-        _repository = repository;
+        _uof = uof;
     }
 
     [HttpGet("Produto/{id}")]
     public ActionResult<IEnumerable<Produto>> GetProdutosCategorias(int id)
     {
-        var produtos = _produtoRepository.GetProdutoCategoria(id);
+        var produtos = _uof.ProdutoRepository.GetProdutoCategoria(id);
 
         if (produtos is null)
             return NotFound($"Não existem produtos para a categoria com ID {id}.");
@@ -34,7 +32,7 @@ public class ProdutosController : ControllerBase
     [HttpGet]
     public ActionResult<IEnumerable<Produto>> Get()
     {
-        var produtos = _repository.GetAll();
+        var produtos = _uof.ProdutoRepository.GetAll();
 
         if (produtos is null)
         {
@@ -47,7 +45,7 @@ public class ProdutosController : ControllerBase
     [HttpGet("{id:int:min(1)}", Name = "ObterProduto")]
     public ActionResult<Produto> Get(int id)
     {
-        var produto = _repository.GetById(c=> c.ProdutoId == id);
+        var produto = _uof.ProdutoRepository.GetById(c=> c.ProdutoId == id);
         if (produto is null)
         {
             return NotFound($"Esse ID {id} Não existe");
@@ -63,7 +61,8 @@ public class ProdutosController : ControllerBase
             return BadRequest("Produto não pode ser nulo.");
         }
         
-        var NovoProduto = _repository.Create(produto);
+        var NovoProduto = _uof.ProdutoRepository.Create(produto);
+        _uof.commit();
 
         return new CreatedAtRouteResult("ObterProduto", new { id = NovoProduto.ProdutoId }, NovoProduto);
     }
@@ -76,7 +75,8 @@ public class ProdutosController : ControllerBase
             return BadRequest("ID do produto não corresponde ao ID da URL.");
         }
 
-        var ProdutoAtualizado = _repository.Update(produto);
+        var ProdutoAtualizado = _uof.ProdutoRepository.Update(produto);
+        _uof.commit();
 
         return Ok(ProdutoAtualizado);
     }
@@ -84,14 +84,16 @@ public class ProdutosController : ControllerBase
     [HttpDelete("{id:int}")]
     public ActionResult Delete(int id)
     {
-       var produto = _repository.GetById(p=> p.ProdutoId == id);
+       var produto = _uof.ProdutoRepository.GetById(p=> p.ProdutoId == id);
 
         if (produto is null)
         {
             return NotFound($"Esse ID {id} Não existe");
         }
 
-        var ProdutoDeletado = _repository.Delete(produto);
+        var ProdutoDeletado = _uof.ProdutoRepository.Delete(produto);
+        _uof.commit();
+
         return Ok(ProdutoDeletado);
 
     }

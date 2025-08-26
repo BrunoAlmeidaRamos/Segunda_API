@@ -5,6 +5,7 @@ using Segunda_API.Context;
 using Segunda_API.Models;
 using Microsoft.Extensions.Logging;
 using Segunda_API.Repositories;
+using Segunda_API.DTOs;
 
 namespace Segunda_API.Controllers;
 
@@ -35,19 +36,32 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpGet("{id:int}", Name = "ObterCategoria")]
-    public ActionResult<Categoria> Get(int id)
+    public ActionResult<CategoriaDTO> Get(int id)
     {
+        // 1️⃣ Pega a categoria do banco pelo repositório
         var categoria = _uof.CategoriaRepository.GetById(c=> c.CategoriaId == id);
-        return Ok(categoria);
+
+        // 2️⃣ Converte a entidade para DTO
+        var categoriaDto = new CategoriaDTO
+        {
+            CategoriaId = categoria.CategoriaId,
+            Nome = categoria.Nome,
+            ImagemUrl = categoria.ImagemUrl
+        };
+
+        // 3️⃣ Retorna o DTO na resposta da API
+        return Ok(categoriaDto);
     }
 
     [HttpPost]
-    public ActionResult<Produto> Post(Categoria categoria)
+    public ActionResult<Produto> Post(CategoriaDTO categoriaDto)
     {
-        if (categoria is null)
+        if (categoriaDto is null)
         {
             return BadRequest("Categoria não pode ser nulo.");
         }
+
+
        var CategoriaCriada = _uof.CategoriaRepository.Create(categoria);
         _uof.commit();
 
@@ -55,9 +69,9 @@ public class CategoriasController : ControllerBase
     }
 
     [HttpPut("{id:int}")]
-    public ActionResult Put(int id, Categoria categoria)
+    public ActionResult Put(int id, CategoriaDTO categoriaDto)
     {
-        if (id != categoria.CategoriaId)
+        if (id != categoriaDto.CategoriaId)
         {
             return BadRequest("ID do Categoria não corresponde ao ID da URL.");
         }

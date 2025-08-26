@@ -6,6 +6,7 @@ using Segunda_API.Models;
 using Microsoft.Extensions.Logging;
 using Segunda_API.Repositories;
 using Segunda_API.DTOs;
+using Segunda_API.DTOs.Mappings;
 
 namespace Segunda_API.Controllers;
 
@@ -32,18 +33,7 @@ public class CategoriasController : ControllerBase
     public ActionResult<IEnumerable<CategoriaDTO>> Get()
     {
         var categorias = _uof.CategoriaRepository.GetAll();
-
-        var categoriasDto = new List<CategoriaDTO>();
-        foreach (var categoria in categorias)
-        {
-          var categoriaDto = new CategoriaDTO()
-          {
-            CategoriaId = categoria.CategoriaId,
-            Nome = categoria.Nome,
-            ImagemUrl = categoria.ImagemUrl
-          };
-            categoriasDto.Add(categoriaDto);
-        }
+        var categoriasDto = categorias.ToCategoriaDTOList();
 
         return Ok(categoriasDto);
     }
@@ -54,13 +44,7 @@ public class CategoriasController : ControllerBase
         // 1️⃣ Pega a categoria do banco pelo repositório
         var categoria = _uof.CategoriaRepository.GetById(c=> c.CategoriaId == id);
 
-        // 2️⃣ Converte a entidade para DTO
-        var categoriaDto = new CategoriaDTO()
-        {
-            CategoriaId = categoria.CategoriaId,
-            Nome = categoria.Nome,
-            ImagemUrl = categoria.ImagemUrl
-        };
+        var categoriaDto = categoria.ToCategoriaDTO();
 
         // 3️⃣ Retorna o DTO na resposta da API
         return Ok(categoriaDto);
@@ -74,24 +58,14 @@ public class CategoriasController : ControllerBase
             return BadRequest("Categoria não pode ser nulo.");
         }
 
-        var categoria = new Categoria()
-        {
-            CategoriaId = categoriaDto.CategoriaId,
-            Nome = categoriaDto.Nome,
-            ImagemUrl = categoriaDto.ImagemUrl
-        };
+        var categoria = CategoriaDTO.ToCategoria();
 
         var CategoriaCriada = _uof.CategoriaRepository.Create(categoria);
         _uof.commit();
 
-        var categoriaCriadaDto = new CategoriaDTO()
-        {
-            CategoriaId = CategoriaCriada.CategoriaId,
-            Nome = CategoriaCriada.Nome,
-            ImagemUrl = CategoriaCriada.ImagemUrl
-        };
+        var NovaCategoriaDto = CategoriaCriada.ToCategoriaDTO();
 
-        return new CreatedAtRouteResult("ObterCategoria", new { id = categoriaCriadaDto.CategoriaId }, categoriaCriadaDto);
+        return new CreatedAtRouteResult("ObterCategoria", new { id = NovaCategoriaDto.CategoriaId }, NovaCategoriaDto);
     }
 
     [HttpPut("{id:int}")]
@@ -102,22 +76,12 @@ public class CategoriasController : ControllerBase
             return BadRequest("ID do Categoria não corresponde ao ID da URL.");
         }
 
-        var categoria = new Categoria()
-        {
-            CategoriaId = categoriaDto.CategoriaId,
-            Nome = categoriaDto.Nome,
-            ImagemUrl = categoriaDto.ImagemUrl
-        };
+        var categoria = categoriaDto.ToCategoria();
 
         var categoriaAtualizada = _uof.CategoriaRepository.Update(categoria);
         _uof.commit();
 
-        var categoriaAtualizadaDto = new CategoriaDTO()
-        {
-            CategoriaId = categoriaAtualizada.CategoriaId,
-            Nome = categoriaAtualizada.Nome,
-            ImagemUrl = categoriaAtualizada.ImagemUrl
-        };
+        var categoriaAtualizadaDto = categoriaAtualizada.ToCategoriaDTO();
 
         return Ok(categoriaAtualizadaDto);
     }
@@ -134,12 +98,7 @@ public class CategoriasController : ControllerBase
         var categoriaRemovida = _uof.CategoriaRepository.Delete(categoria);
         _uof.commit();
 
-        var categoriaRemovidaDto = new CategoriaDTO()
-        {
-            CategoriaId = categoriaRemovida.CategoriaId,
-            Nome = categoriaRemovida.Nome,
-            ImagemUrl = categoriaRemovida.ImagemUrl
-        };
+        var categoriaRemovidaDto = categoriaRemovida.ToCategoriaDTO();
 
         return Ok($"Categoria com ID {id} foi removido com sucesso.");
     }

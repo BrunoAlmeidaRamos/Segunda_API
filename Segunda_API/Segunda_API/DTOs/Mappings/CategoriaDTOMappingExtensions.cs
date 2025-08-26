@@ -4,6 +4,7 @@ namespace Segunda_API.DTOs.Mappings;
 
 public static class CategoriaDTOMappingExtensions
 {
+    //1
     public static CategoriaDTO? ToCategoriaDTO(this Categoria categoria)
     {         
         if (categoria == null) 
@@ -17,6 +18,7 @@ public static class CategoriaDTOMappingExtensions
         };
     }
 
+    //2
     public static Categoria? ToCategoria(this CategoriaDTO categoriaDto)
     {
         if (categoriaDto == null) 
@@ -30,6 +32,7 @@ public static class CategoriaDTOMappingExtensions
         };
     }
 
+    //3
     public static IEnumerable<CategoriaDTO> ToCategoriaDTOList(this IEnumerable<Categoria> categorias)
     {
         if (categorias == null) 

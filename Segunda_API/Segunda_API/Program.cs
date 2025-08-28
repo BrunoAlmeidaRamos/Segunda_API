@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Segunda_API.Context;
+using Segunda_API.DTOs.Mappings;
 using Segunda_API.Extensions;
 using Segunda_API.Repositories;
 using System.Text.Json.Serialization;
@@ -21,6 +22,8 @@ builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+builder.Services.AddAutoMapper(typeof(ProdutoDTOMappingProfile));
 
 var app = builder.Build();
 

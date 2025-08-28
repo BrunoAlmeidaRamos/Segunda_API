@@ -58,7 +58,7 @@ public class CategoriasController : ControllerBase
             return BadRequest("Categoria não pode ser nulo.");
         }
 
-        var categoria = CategoriaDTO.ToCategoria();
+        var categoria = categoriaDto.ToCategoria();
 
         var CategoriaCriada = _uof.CategoriaRepository.Create(categoria);
         _uof.commit();

@@ -44,7 +44,7 @@ public class CategoriasController : ControllerBase
         // 1️⃣ Pega a categoria do banco pelo repositório
         var categoria = _uof.CategoriaRepository.GetById(c=> c.CategoriaId == id);
 
-        var categoriaDto = categoria.ToCategoriaDTO();
+        var categoriaDto = categoria!.ToCategoriaDTO();
 
         // 3️⃣ Retorna o DTO na resposta da API
         return Ok(categoriaDto);
@@ -60,12 +60,12 @@ public class CategoriasController : ControllerBase
 
         var categoria = categoriaDto.ToCategoria();
 
-        var CategoriaCriada = _uof.CategoriaRepository.Create(categoria);
+        var CategoriaCriada = _uof.CategoriaRepository.Create(categoria!);
         _uof.commit();
 
         var NovaCategoriaDto = CategoriaCriada.ToCategoriaDTO();
 
-        return new CreatedAtRouteResult("ObterCategoria", new { id = NovaCategoriaDto.CategoriaId }, NovaCategoriaDto);
+        return new CreatedAtRouteResult("ObterCategoria", new { id = NovaCategoriaDto!.CategoriaId }, NovaCategoriaDto);
     }
 
     [HttpPut("{id:int}")]
@@ -78,7 +78,7 @@ public class CategoriasController : ControllerBase
 
         var categoria = categoriaDto.ToCategoria();
 
-        var categoriaAtualizada = _uof.CategoriaRepository.Update(categoria);
+        var categoriaAtualizada = _uof.CategoriaRepository.Update(categoria!);
         _uof.commit();
 
         var categoriaAtualizadaDto = categoriaAtualizada.ToCategoriaDTO();

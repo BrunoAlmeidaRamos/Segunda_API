@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Segunda_API.Context;
 using Segunda_API.DTOs;
 using Segunda_API.Models;
+using Segunda_API.Paginations;
 using Segunda_API.Repositories;
 
 namespace Segunda_API.Controllers;
@@ -20,6 +21,17 @@ public class ProdutosController : ControllerBase
     {
         _uof = uof;
         _mapper = mapper;
+    }
+
+    [HttpGet("pagination")]
+    public ActionResult<IEnumerable<ProdutoDTO>> Get([FromQuery] ProdutosParameters produtosParameters)
+    {
+        var produtos = _uof.ProdutoRepository.GetProdutos(produtosParameters);
+        if (produtos is null)
+            return Accepted($"Não existem produtos cadastrados.");
+        //var destino = _mapper.map<Destino>(origem);
+        var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+        return Accepted(produtosDto);
     }
 
     [HttpGet("Produto/{id}")]
